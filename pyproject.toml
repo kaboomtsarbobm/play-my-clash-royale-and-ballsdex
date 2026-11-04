@@ -1,0 +1,11 @@
+[project]
+name = "clash_the_royale"
+version = "1.0.0"
+
+description = "EAT MY KIDNEYS"
+license = "MIT"  # replace with your own license
+license-files = ["LICENSE"]
+authors = [
+    { name = "thing", email = "123sesamestreet@gmail.com" },
+]
+readme = "README.md"

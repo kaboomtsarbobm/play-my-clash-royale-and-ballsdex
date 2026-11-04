@@ -5,144 +5,39 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum
 from typing import Final, List, NamedTuple, Optional, Sequence, Tuple, Union
 
-                                                                             
-                          
- 
-                                                                          
-                                                                         
-                                                                    
-                                                                             
+tick = 3
+match_ticks = 60
+overtime_ticks = 20
+double_elixir_after = 40
 
-@dataclass(frozen=True)
-class _ClockConfiguration:
+start_elixir = 5.0
+max_elixir = 10.0
+elixir_seconds = 2.8
 
-    tick_seconds: int
-    regulation_ticks: int
-    overtime_ticks: int
-    double_resource_start_tick: int
+deck_size = 8
 
-@dataclass(frozen=True)
-class _ResourceConfiguration:
+princess_pos = (13, 87)
+king_pos = (0, 100)
+spawn_pos = (20, 80)
+lane_count = 2
+field_length = 100
 
-    starting_amount: float
-    capacity: float
-    regeneration_period_seconds: float
+princess_hp = 1400
+king_hp = 2400
+tower_dps = 60
+tower_range = 25
+aggro_range = 30
 
-@dataclass(frozen=True)
-class _DeckConfiguration:
+unit_dps_factor = 0.12
+hp_scale_target = 600
+ranged_ratio = 1.3
+tank_ratio = 0.75
+min_fraction = 0.01
+ratio_tolerance = 0.0001
 
-    maximum_cards: int
+TICK = tick
 
-@dataclass(frozen=True)
-class _FieldConfiguration:
-
-    princess_positions: Tuple[int, int]
-    king_positions: Tuple[int, int]
-    spawn_positions: Tuple[int, int]
-    lane_total: int
-    length: int
-
-@dataclass(frozen=True)
-class _TowerConfiguration:
-
-    princess_health: int
-    king_health: int
-    damage_per_second: int
-    attack_range: int
-    acquisition_range: int
-
-@dataclass(frozen=True)
-class _UnitBalanceConfiguration:
-
-    damage_scale: float
-    target_average_health: int
-    ranged_attack_health_ratio: float
-    tank_attack_health_ratio: float
-    minimum_attack_fraction: float
-    health_ratio_tolerance: float
-
-_CLOCK: Final[_ClockConfiguration] = _ClockConfiguration(
-    tick_seconds=3,
-    regulation_ticks=60,
-    overtime_ticks=20,
-    double_resource_start_tick=40,
-)
-
-_RESOURCES: Final[_ResourceConfiguration] = _ResourceConfiguration(
-    starting_amount=5.0,
-    capacity=10.0,
-    regeneration_period_seconds=2.8,
-)
-
-_DECK: Final[_DeckConfiguration] = _DeckConfiguration(
-    maximum_cards=8,
-)
-
-_FIELD: Final[_FieldConfiguration] = _FieldConfiguration(
-    princess_positions=(13, 87),
-    king_positions=(0, 100),
-    spawn_positions=(20, 80),
-    lane_total=2,
-    length=100,
-)
-
-_TOWERS: Final[_TowerConfiguration] = _TowerConfiguration(
-    princess_health=1400,
-    king_health=2400,
-    damage_per_second=60,
-    attack_range=25,
-    acquisition_range=30,
-)
-
-_UNIT_BALANCE: Final[_UnitBalanceConfiguration] = _UnitBalanceConfiguration(
-    damage_scale=0.12,
-    target_average_health=600,
-    ranged_attack_health_ratio=1.3,
-    tank_attack_health_ratio=0.75,
-    minimum_attack_fraction=0.01,
-    health_ratio_tolerance=0.0001,
-)
-
-                                                                             
-                                
- 
-                                                                         
-                                                                     
-                                                                             
-
-TICK: Final[int] = _CLOCK.tick_seconds
-MATCH_TICKS: Final[int] = _CLOCK.regulation_ticks
-OVERTIME_TICKS: Final[int] = _CLOCK.overtime_ticks
-DOUBLE_ELIXIR_AFTER: Final[int] = _CLOCK.double_resource_start_tick
-
-START_ELIXIR: Final[float] = _RESOURCES.starting_amount
-MAX_ELIXIR: Final[float] = _RESOURCES.capacity
-ELIXIR_SECONDS: Final[float] = _RESOURCES.regeneration_period_seconds
-
-DECK_SIZE: Final[int] = _DECK.maximum_cards
-
-PRINCESS_POS: Final[Tuple[int, int]] = _FIELD.princess_positions
-KING_POS: Final[Tuple[int, int]] = _FIELD.king_positions
-SPAWN_POS: Final[Tuple[int, int]] = _FIELD.spawn_positions
-LANE_COUNT: Final[int] = _FIELD.lane_total
-FIELD_LENGTH: Final[int] = _FIELD.length
-
-PRINCESS_HP: Final[int] = _TOWERS.princess_health
-KING_HP: Final[int] = _TOWERS.king_health
-TOWER_DPS: Final[int] = _TOWERS.damage_per_second
-TOWER_RANGE: Final[int] = _TOWERS.attack_range
-AGGRO_RANGE: Final[int] = _TOWERS.acquisition_range
-
-UNIT_DPS_FACTOR: Final[float] = _UNIT_BALANCE.damage_scale
-HP_SCALE_TARGET: Final[int] = _UNIT_BALANCE.target_average_health
-RANGED_RATIO: Final[float] = _UNIT_BALANCE.ranged_attack_health_ratio
-TANK_RATIO: Final[float] = _UNIT_BALANCE.tank_attack_health_ratio
-MIN_FRACTION: Final[float] = _UNIT_BALANCE.minimum_attack_fraction
-RATIO_TOLERANCE: Final[float] = _UNIT_BALANCE.health_ratio_tolerance
-
-                                                                             
-                                        
-                                                                             
+DECK_SIZE = deck_size
 
 class TowerSlot(IntEnum):
 
@@ -159,10 +54,6 @@ class TowerRef(NamedTuple):
 
     side: int
     slot: int
-
-                                                                             
-                    
-                                                                             
 
 @dataclass
 class Card:
@@ -195,7 +86,7 @@ class Unit:
         return abs(position - self.pos)
 
     def clamp_position(self) -> None:
-        self.pos = max(0, min(FIELD_LENGTH, self.pos))
+        self.pos = max(0, min(field_length, self.pos))
 
 @dataclass(frozen=True)
 class MovementProfile:
@@ -203,10 +94,9 @@ class MovementProfile:
     reach: float
     speed: float
 
-                                                                       
-RANGED: Final[MovementProfile] = MovementProfile(reach=18, speed=3.0)
-TANK: Final[MovementProfile] = MovementProfile(reach=6, speed=2.5)
-BALANCED: Final[MovementProfile] = MovementProfile(reach=9, speed=3.5)
+ranged: Final[MovementProfile] = MovementProfile(reach=18, speed=3.0)
+tank: Final[MovementProfile] = MovementProfile(reach=6, speed=2.5)
+balanced: Final[MovementProfile] = MovementProfile(reach=9, speed=3.5)
 
 @dataclass
 class Target:
@@ -224,37 +114,37 @@ class Hit:
 
 def movement_profile(card: Card) -> MovementProfile:
     ratio = card.atk / max(card.hp, 1)
-    if ratio > RANGED_RATIO:
-        return RANGED
-    if ratio < TANK_RATIO:
-        return TANK
-    return BALANCED
+    if ratio > ranged_ratio:
+        return ranged
+    if ratio < tank_ratio:
+        return tank
+    return balanced
 
 def tower_position(side_index: int, slot: int) -> int:
     if slot == TowerSlot.KING:
-        return KING_POS[side_index]
-    return PRINCESS_POS[side_index]
+        return king_pos[side_index]
+    return princess_pos[side_index]
 
 class Side:
     def __init__(self, cards: Sequence[Card]) -> None:
         self.cards: List[Card] = list(cards)
         self.cooldowns: List[int] = [0 for _ in self.cards]
-        self.elixir: float = START_ELIXIR
-        self.towers: List[float] = [PRINCESS_HP, PRINCESS_HP, KING_HP]
+        self.elixir: float = start_elixir
+        self.towers: List[float] = [princess_hp, princess_hp, king_hp]
 
     def tower_hp_ratio(self) -> float:
         remaining = sum(self.towers)
-        maximum = PRINCESS_HP * 2 + KING_HP
+        maximum = princess_hp * 2 + king_hp
         return remaining / maximum
 
     def can_afford(self, card: Card) -> bool:
         return self.elixir >= card.cost
 
     def start_cooldown(self, index: int) -> None:
-        self.cooldowns[index] = math.ceil(self.cards[index].cooldown / TICK)
+        self.cooldowns[index] = math.ceil(self.cards[index].cooldown / tick)
 
     def regenerate(self, gain: float) -> None:
-        self.elixir = min(MAX_ELIXIR, self.elixir + gain)
+        self.elixir = min(max_elixir, self.elixir + gain)
 
     def cool_down(self) -> None:
         self.cooldowns = [max(0, remaining - 1) for remaining in self.cooldowns]
@@ -270,27 +160,27 @@ class Game:
 
         everyone = list(deck_a) + list(deck_b)
         average_hp = sum(card.hp for card in everyone) / len(everyone)
-        self.scale: float = HP_SCALE_TARGET / average_hp
+        self.scale: float = hp_scale_target / average_hp
 
     @property
     def double_elixir(self) -> bool:
-        return self.ticks >= DOUBLE_ELIXIR_AFTER
+        return self.ticks >= double_elixir_after
 
     @property
     def time_limit(self) -> int:
         if self.overtime:
-            return MATCH_TICKS + OVERTIME_TICKS
-        return MATCH_TICKS
+            return match_ticks + overtime_ticks
+        return match_ticks
 
     def crowns(self, side: int) -> int:
         enemy = self.sides[1 - side]
         if enemy.towers[TowerSlot.KING] <= 0:
             return 3
-        return sum(1 for lane in range(LANE_COUNT) if enemy.towers[lane] <= 0)
+        return sum(1 for lane in range(lane_count) if enemy.towers[lane] <= 0)
 
     def seconds_left(self) -> int:
         ticks_left = max(0, self.time_limit - self.ticks)
-        return ticks_left * TICK
+        return ticks_left * tick
 
     def play(self, side: int, index: int, lane: int) -> Optional[str]:
         if self.over:
@@ -300,7 +190,7 @@ class Game:
         card = player.cards[index]
 
         if player.cooldowns[index] > 0:
-            wait = player.cooldowns[index] * TICK
+            wait = player.cooldowns[index] * tick
             return f"{card.name} is on cooldown for {wait} more seconds."
 
         if not player.can_afford(card):
@@ -315,10 +205,10 @@ class Game:
             Unit(
                 side=side,
                 lane=lane,
-                pos=SPAWN_POS[side],
+                pos=spawn_pos[side],
                 hp=unit_hp,
                 max_hp=unit_hp,
-                dps=card.atk * self.scale * UNIT_DPS_FACTOR,
+                dps=card.atk * self.scale * unit_dps_factor,
                 reach=profile.reach,
                 speed=profile.speed,
                 name=card.name,
@@ -351,7 +241,9 @@ class Game:
     def _pick_target(self, unit: Unit) -> Optional[Target]:
         enemy_side = 1 - unit.side
 
-        enemy_unit = self._closest_enemy(enemy_side, unit.pos, AGGRO_RANGE, lane=unit.lane)
+        enemy_unit = self._closest_enemy(
+            enemy_side, unit.pos, aggro_range, lane=unit.lane
+        )
         if enemy_unit is not None:
             return Target(TargetKind.UNIT, enemy_unit, enemy_unit.pos)
 
@@ -378,7 +270,7 @@ class Game:
                 continue
 
             distance = abs(target.position - unit.pos)
-            step = unit.speed * TICK
+            step = unit.speed * tick
             fraction = 1.0
 
             if distance > unit.reach:
@@ -390,10 +282,10 @@ class Game:
                 unit.clamp_position()
 
                 fraction = 1 - move / step
-                if fraction <= MIN_FRACTION:
+                if fraction <= min_fraction:
                     continue
 
-            hits.append(Hit(target.kind, target.ref, unit.dps * TICK * fraction))
+            hits.append(Hit(target.kind, target.ref, unit.dps * tick * fraction))
         return hits
 
     def _collect_tower_hits(self) -> List[Hit]:
@@ -406,9 +298,11 @@ class Game:
 
                 lane = None if slot == TowerSlot.KING else slot
                 origin = tower_position(side_index, slot)
-                foe = self._closest_enemy(enemy_side, origin, TOWER_RANGE, lane=lane)
+                foe = self._closest_enemy(
+                    enemy_side, origin, tower_range, lane=lane
+                )
                 if foe is not None:
-                    hits.append(Hit(TargetKind.UNIT, foe, TOWER_DPS * TICK))
+                    hits.append(Hit(TargetKind.UNIT, foe, tower_dps * tick))
         return hits
 
     def _apply(self, hit: Hit) -> None:
@@ -421,7 +315,7 @@ class Game:
     def tick(self) -> None:
         self.ticks += 1
 
-        gain = TICK / ELIXIR_SECONDS
+        gain = tick / elixir_seconds
         if self.double_elixir:
             gain *= 2
 
@@ -454,17 +348,17 @@ class Game:
             self._finish(leader)
             return
 
-        if not self.overtime and self.ticks >= MATCH_TICKS:
+        if not self.overtime and self.ticks >= match_ticks:
             if crowns_a != crowns_b:
                 self._finish(leader)
             else:
                 self.overtime = True
             return
 
-        if self.overtime and self.ticks >= MATCH_TICKS + OVERTIME_TICKS:
+        if self.overtime and self.ticks >= match_ticks + overtime_ticks:
             ratio_a = self.sides[1].tower_hp_ratio()
             ratio_b = self.sides[0].tower_hp_ratio()
-            if abs(ratio_a - ratio_b) > RATIO_TOLERANCE:
+            if abs(ratio_a - ratio_b) > ratio_tolerance:
                 self._finish(0 if ratio_a < ratio_b else 1)
             else:
                 self._finish(None)

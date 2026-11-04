@@ -6,25 +6,27 @@ from datetime import timedelta
 import discord
 from discord import app_commands
 from discord.ext import commands
-from django.db.models import F
+from django.db.models import f
 from django.utils import timezone
 
-from bd_models.models import Ball, BallInstance, Player
+from bd_models.models import ball, ballinstance, player
 
-from .battle import DECK_SIZE, TICK, Card, Game
-from .models import RoyaleCard, RoyalePlayer
+from .battle import deck_size, tick, card, game
+from .models import royalecard, royaleplayer
 from .render import render
 
-log = logging.getLogger("ballsdex.packages.royale")
+log = logging.getlogger("ballsdex.packages.royale")
 
-CHEST_COOLDOWN = timedelta(hours=4)
-WIN_REWARD = 100
-WIN_PER_CROWN = 100
-LOSS_PER_CROWN = 50
-CHESTS = [
-    ("Silver Chest", 60, 100, 300),
-    ("Golden Chest", 30, 300, 800),
-    ("Magical Chest", 10, 800, 2000),
+chest_cooldown: timedelta = timedelta(hours=4)
+
+win_reward: int = 100
+win_per_crown: int = 100
+loss_per_crown: int = 50
+
+chests: list[tuple[str, int, int, int]] = [
+    ("Clash", 60, 100, 300),
+    ("Royale", 30, 300, 800),
+    ("Awesome Verity Chest", 10, 800, 2000),
 ]
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .battle import KING_HP, KING_POS, PRINCESS_HP, PRINCESS_POS
+from .battle import king_hp, king_pos, princess_hp, princess_pos
 
 ARENA_PATH = Path(__file__).parent / "assets" / "arena.png"
 WIDTH = 640
@@ -51,9 +51,9 @@ def render(game) -> BytesIO:
     for side in (0, 1):
         for t in range(3):
             hp = game.sides[side].towers[t]
-            pos = KING_POS[side] if t == 2 else PRINCESS_POS[side]
+            pos = king_pos[side] if t == 2 else princess_pos[side]
             cx, cy = _xy(img, t, pos)
-            maximum = KING_HP if t == 2 else PRINCESS_HP
+            maximum = king_hp if t == 2 else princess_hp
             w, h = (54, 42) if t == 2 else (44, 34)
             box = [cx - w // 2, cy - h // 2, cx + w // 2, cy + h // 2]
             if hp <= 0:

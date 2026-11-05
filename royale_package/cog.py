@@ -6,7 +6,7 @@ from datetime import timedelta
 import discord
 from discord import app_commands
 from discord.ext import commands
-from django.db.models import f
+from django.db.models import F
 from django.utils import timezone
 
 from bd_models.models import ball, ballinstance, player
